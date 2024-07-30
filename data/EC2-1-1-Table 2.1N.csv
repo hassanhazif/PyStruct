@@ -1,0 +1,3 @@
+"Design Situtations","gamma_c for concrete","gamma_s for reinforcing steel","gamma_s for prestressing steel"
+"Persistent & Transient", 1.5, 1.15, 1.15
+"Accidental", 1.2, 1.0, 1.0
