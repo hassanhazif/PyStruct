@@ -1,5 +1,7 @@
 import json
 
-with open ('data/Params.json', 'r') as file:
+with open('data/Params.json') as file:
     data = json.load(file)
-print(data)
+
+C_nom = C_min + DeltaC_dev
+

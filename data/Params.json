@@ -1,12 +1,15 @@
 {
     "Params": {
-        "As_prov": {
-            "Description": "Provided Area of steel",
-            "Latex": "As_{prov}"
+        "C_nom": {
+            "Description": "nominal cover",
+            "Latex": "C_{nom}"
         },
-        "phi_abc": {
-            "Description": "Test Description",
-            "Latex": "\\phi_{abc}"
+        "DeltaC_dev": {
+            "Description": "Allowance in design for deviation",
+            "Latex": "\\Delta C_{dev}"
         }
+    },
+    "Exposure Classes": {
+
     }
 }
