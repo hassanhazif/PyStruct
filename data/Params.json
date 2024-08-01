@@ -1,0 +1,12 @@
+{
+    "Params": {
+        "As_prov": {
+            "Description": "Provided Area of steel",
+            "Latex": "As_{prov}"
+        },
+        "phi_abc": {
+            "Description": "Test Description",
+            "Latex": "\\phi_{abc}"
+        }
+    }
+}
