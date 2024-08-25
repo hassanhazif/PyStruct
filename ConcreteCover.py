@@ -14,4 +14,4 @@ def ConcreteCover(file = 'data/EC2.json', S_class="S4", X_class="XC2",Bar_size=1
     C_min = max(C_min_b, (C_min_dur + DeltaC_dur_gemma - DeltaC_dur_st - DeltaC_dur_add), 10) # minimum cover, c_min
     return(C_min)
 
-print(ConcreteCover(S_class="S4",X_class="XC2"))
+print(ConcreteCover(S_class="S4",X_class="XC3"))
