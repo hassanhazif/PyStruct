@@ -2,10 +2,11 @@ from Prelims import LoadData
 
 # Layered Bar Centroids
 
-BarArray = [[4,16],[2,16]]
+BarArray = [[4,16],[4,16]]
 
-def RectBarsYCentroidDev(BarArray:list,y_spacing=15): # from centroid of bar, bar arrangement should be symmetric
-
+def BarCentroid(BarArray:list,y_spacing=12): 
+    # Units are in mm
+    # From centroid of bar, bar arrangement should be symmetric
     weightages = []
     lengths = []
     y = 0
@@ -17,6 +18,6 @@ def RectBarsYCentroidDev(BarArray:list,y_spacing=15): # from centroid of bar, ba
     for length in range(len(lengths)):
         y = y + lengths[length]*(weightages[length]/sum(weightages))
 
-    return(round(y))
+    return(y)
 
-print(RectBarsYCentroidDev(BarArray))
+#print(BarCentroidY(BarArray))
