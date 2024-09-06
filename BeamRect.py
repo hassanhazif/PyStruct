@@ -20,4 +20,23 @@ def BarCentroid(BarArray:list,y_spacing=12):
 
     return(y)
 
-#print(BarCentroidY(BarArray))
+def LeverArmZ(breadth:float,depth:float,moment:float,f_ck:float):
+    """ Get Lever arm of the beam, This function is incomplete
+    :param depth: mm
+    :param breadth: mm
+    :param moment: KNm
+    :param f_ck: MPa
+    """
+    M = moment
+    b = breadth
+    d = depth
+    
+    K_i = M/(b*(d**2)*f_ck)
+    z = (0.5+(0.25-0.881*K_i)**(0.5))*d
+    return ({
+        "K_i": K_i,
+        "z": z
+    })
+
+
+print(LeverArmZ(250,420,80,25))
