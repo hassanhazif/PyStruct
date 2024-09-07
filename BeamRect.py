@@ -16,6 +16,7 @@ def main():
 class RCC_BeamRect:
     def __init__(self, name:str, Moment:float, Shear:float, breadth:float, height:float, BarArray:list, Concrete_Material:str, BarYSpacing:float=25, Moment_redist:float = 10, ConcreteCover = 25, LinkDia = 8):
         """ Define a Reinforced Concrete Rectangular Beam
+        :param name:
         :param Moment: Design moment in KNm
         :param breadth: mm
         :param height: mm
