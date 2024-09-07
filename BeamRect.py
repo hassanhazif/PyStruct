@@ -10,11 +10,11 @@ BarArray2 = {
 BarArray = [[4,16],[2,16]]
 
 def main():
-    B1 = RCC_BeamRect(50,0,250,400,BarArray,"C25/30")
+    B1 = RCC_BeamRect("B1",50,0,250,400,BarArray,"C30/37")
     print(B1.f_ck)
 
 class RCC_BeamRect:
-    def __init__(self, Moment:float, Shear:float, breadth:float, height:float, BarArray:list, Concrete_Material:str, BarYSpacing:float=25, Moment_redist:float = 10, ConcreteCover = 25, LinkDia = 8):
+    def __init__(self, name:str, Moment:float, Shear:float, breadth:float, height:float, BarArray:list, Concrete_Material:str, BarYSpacing:float=25, Moment_redist:float = 10, ConcreteCover = 25, LinkDia = 8):
         """ Define a Reinforced Concrete Rectangular Beam
         :param Moment: Design moment in KNm
         :param breadth: mm
@@ -26,11 +26,14 @@ class RCC_BeamRect:
         :param ConcreteCover: mm
         :param LinkDia: mm
         """
-        self.concrete = LoadData('data/Materials.json')["Concrete"][Concrete_Material]
+
+        self.name = name
+        self.concreteMaterial = Concrete_Material
+        self.concreteData = LoadData('data/Materials.json')["Concrete"][Concrete_Material]
         self.b = breadth
         self.h = height
         self.bars = BarArray
-        self.f_ck = self.concrete["f_ck"]
+        self.f_ck = self.concreteData["f_ck"]
         self.d = EffectiveDepth(self.h,ConcreteCover,LinkDia,SteelCentroid(BarArray,BarYSpacing))
         self.z = LeverArmZ(Moment,breadth,self.d,self.f_ck,redistribution=Moment_redist)["z"]
 

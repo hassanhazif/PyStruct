@@ -1,19 +1,21 @@
 # Beams
 
 ## Design Procedure
+### Analysis
 1. Determine design life
-2. Assess actions on the slab
-3. Determine which combinations of actions apply
+2. Assess actions
+3. Determine combinations of actions
 4. Determine loading arrangements
-5. Assess durability requirements and determine concrete strength
-6. Check cover requirements for appropriate fire resistance period
-7. Calculate min. cover for durability, fire and bond requirements
-8. Analyse structure to obtain critical moments and shear forces
-9. Desing flexural reinforcement
-10. Check deflection
-11. Chech shear capacity
-12. Check spacing of bars
-13. Check crack control
+### Design
+1. Assess durability requirements and determine concrete strength
+2. Check cover requirements for appropriate fire resistance period
+3. Calculate min. cover for durability, fire and bond requirements
+4. Analyse structure to obtain critical moments and shear forces
+5. Desing flexural reinforcement
+6. Check deflection
+7. Chech shear capacity
+8. Check spacing of bars
+9. Check crack control
 
 ## Flexural design
 
