@@ -30,6 +30,8 @@ $ \alpha_{cc} $ - the coefficient taking account of long term effects on the com
 
 ### The Rectangular Stress Block
 
+![image](Images/Notes/StressBlock.png)
+
 $\lambda $ - The percentage for reduction of the stress block. Value of $\lambda$ is dependent on the strength class of the concrete and is defined in
 > EC2-1 - Clause 3.1.7(3)
 
@@ -42,6 +44,8 @@ $d$ - *effective depth* - dimension from the extreme compression face to the cen
 Compression area height ($x$) should be limited to $0.45d$ to ensure yielding of steel first
 
 Lever arm ($z$) should be limited to $0.95d$ to limit maximum strain in reinforcement to a value of 0.025 and avoids the reliance on any poor-quality concrete on top of the beam
+
+$K'$ is used to limit the neutral axis depth. it is given as an absolute value, given as a function of the amount of redistribution of momements assumed, and is dependent on the concrete strength classes.
 
 ## Crack control
 > EC2-1 - Clause 7.3.2
