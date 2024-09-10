@@ -12,10 +12,12 @@
 3. Calculate min. cover for durability, fire and bond requirements
 4. Analyse structure to obtain critical moments and shear forces
 5. Desing flexural reinforcement
-6. Check deflection
-7. Chech shear capacity
-8. Check spacing of bars
-9. Check crack control
+6. Design compression reinforcement if required
+7. Check shear capacity 
+8. Check torsion capacity
+9. Check deflection
+10. Check spacing of bars
+11. Check crack control
 
 ## Flexural design
 
@@ -49,7 +51,19 @@ Lever arm ($z$) should be limited to $0.95d$ to limit maximum strain in reinforc
 
 $K'$ is used to limit the neutral axis depth. it is given as an absolute value, given as a function of the amount of redistribution of momements assumed, and is dependent on the concrete strength classes.
 
+### Doubly reinforced sections
+
+Moment about the line of action of $F_{st}$:
+
+$M = (F_{c} \times z) + (F_{sc}\times(d-d_{2})) $
+
+$F_{c}$ - the concrete compression capacity
+
+$F_{sc}$ - the compression steel capacity
+
+$d_{2}$ - the distance to the steel centroid from the top of concrete fibre.
+
 ## Crack control
 > EC2-1 - Clause 7.3.2
 
-This is where the mid-height reinforcement in beams come from
+This is where the mid-height reinforcement in beams come from. There is a spacing limitation

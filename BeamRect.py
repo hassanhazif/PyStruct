@@ -2,22 +2,23 @@ from Prelims import LoadData
 from math import ceil
 from math import pi
 
-BarArray = {"TOP":["T",0,[[2,12]]], "BTM":["T",20,[[2,10],[2,10]]],"LNK":["R",100,[[2,6]]]}
+BarArray = {"TOP":["T",0,[[4,12]]], "BTM":["T",20,[[2,10],[2,10]]],"LNK":["R",100,[[2,8]]]}
 
 def main():
-    B1 = RCC_BeamRect("B1",50,0,0,250,400,BarArray,"C30/37")
-    print(B1.As_Prov("lnk"))
+    B1 = RCC_BeamRect("B1",150,0,0,250,250,BarArray,"C30/37")
+    print(B1.d)
+    print(B1.rf_type)
     #print(BarArrayDet("BTM",BarArray2))
     #print(BarArray2["BTM"])
     #print(SteelCentroid("BTM",BarArray2))
 
 class RCC_BeamRect:
-    def __init__(self, name:str, Moment:float, Shear:float, Torsion:float, breadth:float, height:float, BarArray, Concrete_Material:str, BarYSpacing:float=25, Moment_redist:float = 10, ConcreteCover = 25, LinkDia = 8):
-        """ Define a Reinforced Concrete Rectangular Beam
+    def __init__(self, name:str, M_ED:float, V_ED:float, T_ED:float, breadth:float, height:float, BarArray, Concrete_Material:str, Moment_redist:float = 10, ConcreteCover = 0):
+        """ Define a Rectangular Reinforced Concrete Beam
         :param name:
-        :param Moment: Design moment in kNm
-        :param Shear: Design Shear in kN
-        :param Torsion: Design torsion in kPa
+        :param M_ED: Design moment in kNm
+        :param V_ED: Design Shear in kN
+        :param T_ED: Design torsion in kPa
         :param breadth: mm
         :param height: mm
         :param BarArray: in the form {"Location":["class",spacing,[Layers]],"Location2":...}
@@ -35,8 +36,11 @@ class RCC_BeamRect:
         self.h = height
         self.bars = BarArray
         self.f_ck = self.concreteData["f_ck"]
-        self.d = EffectiveDepth(self.h,ConcreteCover,LinkDia,SteelCentroid("BTM",BarArray))
-        self.z = LeverArmZ(Moment,breadth,self.d,self.f_ck,redistribution=Moment_redist)["z"]
+        self.linkDia = self.bars["LNK"][2][0][1]
+        self.d = EffectiveDepth(self.h,ConcreteCover,self.linkDia,SteelCentroid("BTM",BarArray))
+        self.d2 = self.h - EffectiveDepth(self.h,ConcreteCover,self.linkDia,SteelCentroid("TOP",BarArray))
+        self.z = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["z"]
+        self.rf_type = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["rf"]
 
     def As_Prov(self, location):
         As_Prov = BarArrayDet(location.upper(),self.bars)["As_Prov"]
@@ -125,19 +129,22 @@ def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:f
     r = redistribution
 
     K_prime = LeverArmKprime(r)["K_prime"]
-    
+
     K = M/(b*(d**2)*f_ck)
+
+    if K <= K_prime:
+        rf = "singly"
+    else:
+        rf = "doubly"
+        K = K_prime
+    
+    
     try:
         z_per_d = min(0.5+(0.25-0.881*K)**(0.5),0.95)
     except:
         return ({"error":f"This section size is inadequate for a moment of {moment} KNm"})
 
     z = z_per_d * d
-
-    if K <= K_prime:
-        rf = "singly"
-    else:
-        rf = "doubly"
 
     return ({
         "K_prime": round(K_prime,3),
