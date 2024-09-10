@@ -1,26 +1,26 @@
 from Prelims import LoadData
 from math import ceil
+from math import pi
 
-BarArray2 = {
-    "T":["T",[2,12]],
-    "B":["T",[4,16],[2,16]],
-    "L":["R",[1,6,100]]
-    }
-
-BarArray = [[4,16],[2,16]]
+BarArray = {"TOP":["T",0,[[2,12]]], "BTM":["T",20,[[2,10],[2,10]]],"LNK":["R",100,[[2,6]]]}
 
 def main():
-    B1 = RCC_BeamRect("B1",50,0,250,400,BarArray,"C30/37")
-    print(B1.f_ck)
+    B1 = RCC_BeamRect("B1",50,0,0,250,400,BarArray,"C30/37")
+    print(B1.As_Prov("lnk"))
+    #print(BarArrayDet("BTM",BarArray2))
+    #print(BarArray2["BTM"])
+    #print(SteelCentroid("BTM",BarArray2))
 
 class RCC_BeamRect:
-    def __init__(self, name:str, Moment:float, Shear:float, breadth:float, height:float, BarArray:list, Concrete_Material:str, BarYSpacing:float=25, Moment_redist:float = 10, ConcreteCover = 25, LinkDia = 8):
+    def __init__(self, name:str, Moment:float, Shear:float, Torsion:float, breadth:float, height:float, BarArray, Concrete_Material:str, BarYSpacing:float=25, Moment_redist:float = 10, ConcreteCover = 25, LinkDia = 8):
         """ Define a Reinforced Concrete Rectangular Beam
         :param name:
-        :param Moment: Design moment in KNm
+        :param Moment: Design moment in kNm
+        :param Shear: Design Shear in kN
+        :param Torsion: Design torsion in kPa
         :param breadth: mm
         :param height: mm
-        :param BarArray: list in the form [[number of bars,diameter of bars],[number of bars,diameter of bars]], starting from bottom layer
+        :param BarArray: in the form {"Location":["class",spacing,[Layers]],"Location2":...}
         :param Concrete_Material: Check material list in /data/Materials.json and select material
         :param BarYSpacing: c/c spacing between layers in mm
         :param Moment_redist: % of redistribution of moments
@@ -35,10 +35,31 @@ class RCC_BeamRect:
         self.h = height
         self.bars = BarArray
         self.f_ck = self.concreteData["f_ck"]
-        self.d = EffectiveDepth(self.h,ConcreteCover,LinkDia,SteelCentroid(BarArray,BarYSpacing))
+        self.d = EffectiveDepth(self.h,ConcreteCover,LinkDia,SteelCentroid("BTM",BarArray))
         self.z = LeverArmZ(Moment,breadth,self.d,self.f_ck,redistribution=Moment_redist)["z"]
 
-def SteelCentroid(BarArray:list,y_spacing=20): 
+    def As_Prov(self, location):
+        As_Prov = BarArrayDet(location.upper(),self.bars)["As_Prov"]
+        return(As_Prov)
+
+def BarArrayDet(Location:str,BarArray):
+    ''' Enter Bar array to give details
+    :param Location: str
+    :param BarArray: in the form {"Location":["class",spacing,[Layers]],"Location2":...}
+    '''
+    Material_Data = LoadData('data/Materials.json')["Rebar"][BarArray[Location][0]]
+    f_yk = Material_Data["f_yk"]
+    S = BarArray[Location][1] #spacing
+    layers = BarArray[Location][2]
+    Area = 0
+    for layer in range(len(layers)):
+        n = layers[layer][0]
+        d = layers[layer][1]
+        Area = Area + n * pi * (d/2) **2
+
+    return({"S":S,"f_yk":f_yk, "As_Prov": round(Area,3), "Layers":layers})
+
+def SteelCentroid(Location:str,BarArray): 
     """ Find the centroid of a layered bar arrangement. Layers should be symmetric accross the x axis. Distance is starting from bottom of bottom layer
     :param BarArray: list in the form [[number of bars,diameter of bars],[number of bars,diameter of bars]], starting from bottom layer
     :param y_spacing: c/c spacing between layers in mm
@@ -46,16 +67,18 @@ def SteelCentroid(BarArray:list,y_spacing=20):
     """
     weightages = []
     lengths = []
-    y_0 = BarArray[0][1]/2
+    y_spacing = BarArrayDet(Location,BarArray)["S"]
+    BarLayers = BarArrayDet(Location,BarArray)["Layers"]
+    a_0 = BarLayers[0][1]/2
     y = 0
-    for layer in range(len(BarArray)):
-        ThisLayer = (BarArray[layer][0]*BarArray[layer][1])
+    for layer in range(len(BarLayers)):
+        ThisLayer = (BarLayers[layer][0]*BarLayers[layer][1])
         weightages.append(ThisLayer)
         lengths.append(layer*y_spacing)
     for length in range(len(lengths)):
         y = y + lengths[length]*(weightages[length]/sum(weightages))
     
-    y_1 = y+y_0
+    y_1 = y+a_0
 
     return(round(y_1,3))
 
@@ -122,7 +145,7 @@ def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:f
         "K": round(K,3),
         "z/d": round(z_per_d,3),
         "z" : round(z,3)
-    })
+    }) 
 
 def AstReq(Moment:float,LeverArmZ:float,f_yd:float):
     """ Area of reinforcing steel required
