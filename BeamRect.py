@@ -111,7 +111,7 @@ def LeverArmKprime(redistribution:float = 10):
         return ({"delta":round(b,3),"K_prime": round(K_prime,3)})
 
 def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:float = 10):
-    """ Get Lever arm of the beam, This function is incomplete
+    """ Get Lever arm of the beam
     :param moment: KNm
     :param depth: mm
     :param breadth: mm
@@ -130,10 +130,11 @@ def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:f
 
     K_prime = LeverArmKprime(r)["K_prime"]
 
-    K = M/(b*(d**2)*f_ck)
+    K_0 = M/(b*(d**2)*f_ck)
 
-    if K <= K_prime:
+    if K_0 <= K_prime:
         rf = "singly"
+        K = K_0
     else:
         rf = "doubly"
         K = K_prime
@@ -149,23 +150,27 @@ def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:f
     return ({
         "K_prime": round(K_prime,3),
         "rf": rf,
-        "K": round(K,3),
+        "K": round(K_0,3),
         "z/d": round(z_per_d,3),
         "z" : round(z,3)
     }) 
 
-def AstReq(Moment:float,LeverArmZ:float,f_yd:float):
-    """ Area of reinforcing steel required
+def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:float,f_yd:float, f_ck:float, K:float, K_prime:float, x:float):
+    """ Area of tension reinforcment required
     :param Moment: KNm
     :param LeverArmZ: mm
     :param f_yd: Design yield strength of reinforcement (MPa)
+    :param x: d - neutral axis
     """
     M = Moment * 1e6
     z = LeverArmZ
-
+    b = breadth
+    d = depth
+    d_2 = depth2
+    f_sc = 200000*((0.0035*(x-d_2))/x)
     A_st = M/(f_yd*z)
-
-    return ({"A_st": ceil(A_st)})
+    A_sc = ((K-K_prime)*b*d**2*f_ck)/(f_sc*(d-d_2))
+    return ({"A_st": ceil(A_st),"A_sc": ceil(A_sc)})
 
 # def BarNotation(BarArray):
 #     T = []
