@@ -2,17 +2,17 @@ from Prelims import LoadData
 from math import ceil
 from math import pi
 
-BarArray = {"TOP":["T",0,[[4,12]]], "BTM":["T",20,[[1,10]]],"LNK":["R",100,[[2,8]]]}
+BarArray = {"TOP":["T",0,[[4,16]]], 
+            "BTM":["T",20,[[5,16]]],
+            "LNK":["R",100,[[2,8]]]}
 
 def main():
-    B1 = RCC_BeamRect("B1",150,0,0,250,250,BarArray,"C30/37")
-    print(f"A req st: {B1.As_Req['A_st']}")
-    print(f"A prov st: {B1.As_Prov('btm')}\n")
-    print(f"A req sc: {B1.As_Req['A_sc']}")
-    print(f"A prov sc: {B1.As_Prov('top')}")
-    #print(BarArrayDet("BTM",BarArray2))
-    #print(BarArray2["BTM"])
-    #print(SteelCentroid("BTM",BarArray2))
+    B1 = RCC_BeamRect("B1",150,0,0,250,450,BarArray,"C30/37")
+    print(f"A st req: {B1.As_Req['A_st']}")
+    print(f"A st prov: {B1.As_Prov('btm')}\n")
+    print(B1.flexuralCheck())
+    # #print(BarArrayDet("BTM",BarArray2))
+    # print(BarArrayDet("BTM",BarArray))
 
 class RCC_BeamRect:
     def __init__(self, name:str, M_ED:float, V_ED:float, T_ED:float, breadth:float, height:float, BarArray, Concrete_Material:str, Moment_redist:float = 10, ConcreteCover = 0):
@@ -50,6 +50,18 @@ class RCC_BeamRect:
     def As_Prov(self, location):
         As_Prov = BarArrayDet(location.upper(),self.bars)["As_Prov"]
         return(As_Prov)
+    
+    def flexuralCheck(self):
+        Out = {}
+        if self.As_Prov("BTM") >= self.As_Req["A_st"]:
+            Out["A_st"] = "PASS"
+        else:
+            Out["A_st"] = "FAIL"
+        if self.As_Prov("TOP") >= self.As_Req["A_sc"]:
+            Out["A_sc"] = "PASS"
+        else:
+            Out["A_sc"] = "FAIL"
+        return Out
 
 def BarArrayDet(Location:str,BarArray):
     ''' Enter Bar array to give details
@@ -178,8 +190,34 @@ def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:floa
     E_s = 200000
     f_sc = E_s*((e_cu3*(x-d_2))/x)
     A_st = M/(f_yd*z)
-    A_sc = ((K-K_prime)*b*d**2*f_ck)/(f_sc*(d-d_2))
+    A_sc = max(0,((K-K_prime)*b*d**2*f_ck)/(f_sc*(d-d_2)))
     return ({"A_st": ceil(A_st),"A_sc": ceil(A_sc)})
+
+def ConcShearCapacity(b_w, d, A_sl, A_c, f_ck, gamma_c = 1.5, N_Ed = 0):
+    ''' Concrete shear capacity formula for members not requiring s (empirical) (Equation 6.2a EN 1992-1-1)
+    :param b_w: smallest width of the cross-section in the tensile area
+    :param d: effective depth
+    :param A_sl: fully anchored tension reinforcement
+    :param A_c: cross-sectional area of the concrete in mm2
+    :param f_cd: design concrete strength
+    :param gamma_c: concrete safety factor
+    :param N_Ed: axial force in the cross-section due to loading or prestressing (in N)
+    '''
+    rho_1 = min(A_sl / (b_w * d), 0.02)
+    k = min (1 + (200/d)**(1/2),2)
+    f_cd = f_ck / gamma_c
+    sigma_cp = min (N_Ed/A_c,0.2*f_cd)
+    C_Rd_c = 0.18/gamma_c
+    v_min = 0.035*k**(3/2)*f_ck**(1/2)
+    k_1 = 0.15
+
+    if N_Ed > 0:
+        V_Rd_c = max((C_Rd_c*k*(100*rho_1*f_ck)**(1/3)+k_1*sigma_cp) * b_w * d , (v_min + k_1 * sigma_cp)* b_w *d )
+    else:
+        V_Rd_c = max((0.12*k*(100*rho_1*f_ck)**(1/3)*b_w*d, (0.035*k**(3/2)*f_ck**(1/2))*b_w*d))
+    
+    return V_Rd_c
+                     
 
 # def BarNotation(BarArray):
 #     T = []

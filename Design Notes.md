@@ -13,7 +13,7 @@
 4. Analyse structure to obtain critical moments and shear forces
 5. Desing flexural reinforcement
 6. Design compression reinforcement if required
-7. Check shear capacity 
+7. Check shear capacity     
 8. Check torsion capacity
 9. Check deflection
 10. Check spacing of bars
