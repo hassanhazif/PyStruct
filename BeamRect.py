@@ -2,12 +2,14 @@ from Prelims import LoadData
 from math import ceil
 from math import pi
 
-BarArray = {"TOP":["T",0,[[4,12]]], "BTM":["T",20,[[2,10],[2,10]]],"LNK":["R",100,[[2,8]]]}
+BarArray = {"TOP":["T",0,[[4,12]]], "BTM":["T",20,[[1,10]]],"LNK":["R",100,[[2,8]]]}
 
 def main():
     B1 = RCC_BeamRect("B1",150,0,0,250,250,BarArray,"C30/37")
-    print(B1.d)
-    print(B1.rf_type)
+    print(f"A req st: {B1.As_Req['A_st']}")
+    print(f"A prov st: {B1.As_Prov('btm')}\n")
+    print(f"A req sc: {B1.As_Req['A_sc']}")
+    print(f"A prov sc: {B1.As_Prov('top')}")
     #print(BarArrayDet("BTM",BarArray2))
     #print(BarArray2["BTM"])
     #print(SteelCentroid("BTM",BarArray2))
@@ -41,6 +43,9 @@ class RCC_BeamRect:
         self.d2 = self.h - EffectiveDepth(self.h,ConcreteCover,self.linkDia,SteelCentroid("TOP",BarArray))
         self.z = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["z"]
         self.rf_type = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["rf"]
+        self.K = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["K"]
+        self.K_prime = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["K_prime"]
+        self.As_Req = AsReq(M_ED,self.b,self.d,self.d2,self.z,460,self.f_ck,self.K,self.K_prime)
 
     def As_Prov(self, location):
         As_Prov = BarArrayDet(location.upper(),self.bars)["As_Prov"]
@@ -59,7 +64,7 @@ def BarArrayDet(Location:str,BarArray):
     for layer in range(len(layers)):
         n = layers[layer][0]
         d = layers[layer][1]
-        Area = Area + n * pi * (d/2) **2
+        Area = Area + (n * pi * (d/2) **2)
 
     return({"S":S,"f_yk":f_yk, "As_Prov": round(Area,3), "Layers":layers})
 
@@ -155,7 +160,7 @@ def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:f
         "z" : round(z,3)
     }) 
 
-def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:float,f_yd:float, f_ck:float, K:float, K_prime:float, x:float):
+def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:float,f_yk:float, f_ck:float, K:float, K_prime:float, gamma_st:float = 1.15):
     """ Area of tension reinforcment required
     :param Moment: KNm
     :param LeverArmZ: mm
@@ -167,7 +172,11 @@ def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:floa
     b = breadth
     d = depth
     d_2 = depth2
-    f_sc = 200000*((0.0035*(x-d_2))/x)
+    x = 2.5* (d-z)
+    f_yd = f_yk/gamma_st
+    e_cu3 = 0.0035
+    E_s = 200000
+    f_sc = E_s*((e_cu3*(x-d_2))/x)
     A_st = M/(f_yd*z)
     A_sc = ((K-K_prime)*b*d**2*f_ck)/(f_sc*(d-d_2))
     return ({"A_st": ceil(A_st),"A_sc": ceil(A_sc)})
