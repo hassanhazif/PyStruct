@@ -1,6 +1,10 @@
 from Prelims import LoadData
 from math import ceil
 from math import pi
+from math import tan
+from math import cos
+from math import sin
+from Prelims import cot
 
 BarArray = {"TOP":["T",0,[[4,16]]], 
             "BTM":["T",20,[[5,16]]],
@@ -218,6 +222,30 @@ def ConcShearCapacity(b_w, d, A_sl, A_c, f_ck, gamma_c = 1.5, N_Ed = 0):
     
     return V_Rd_c
                      
+def ShearCapacity(A_sw, S, f_ywk, b_w,z,v_1,f_ck,alpha_cw = 1,theta = 21.8, alpha = 90, gamma_c = 1.5, gamma_y = 1.15):
+    ''' Shear Capacity of a section
+    :param A_sw: cross sectional area of shear reinforcement
+    :param S: Spacing of reinforcement
+    :param f_ywk: Characteristic yield of shear reinforcement
+    :param b_w: smallest width of the cross section in the tensile area
+    :param z: lever arm of the section
+    :param v_1: empirical factor to take account of the actual stress distribution in the concrete.
+    :param f_cd: design concrete strength
+    :param alpha_cw: a coefficient taking account of any applied compression force (for non-prestressed structures alpha_cw = 1)
+    :param theta: between 21.8 and 45 degrees
+    :param alpha: angle between shear reinforcement and the beam axis
+    '''
+    # V_RD > V_ED
+    f_ywd = f_ywk / gamma_y
+    V_Rd_s = (A_sw/S)*z*f_ywd*(cot(theta)+cot(alpha))*sin(alpha)
+
+    f_cd = f_ck / gamma_c
+    v = 0.6*(1 - (f_ck/250))
+    v_1 = v*(1 - cos(alpha))
+    V_Rd_max = (alpha_cw*b_w*z*v_1*f_cd)*(cot(theta)+cot(alpha))/(1+cot(theta)**2)
+
+    V_Rd = min(V_Rd_s, V_Rd_max)
+    return V_Rd
 
 # def BarNotation(BarArray):
 #     T = []

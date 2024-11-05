@@ -63,6 +63,12 @@ $F_{sc}$ - the compression steel capacity
 
 $d_{2}$ - the distance to the steel centroid from the top of concrete fibre.
 
+## Shear Design
+
+if concrete shear capacity $V_{Rd,C}$ > $V_{ED}$ then minimum shear reinforcement is required.
+
+$\theta$ may be assumed to be any angle between 21.8 and 45.
+
 ## Crack control
 > EC2-1 - Clause 7.3.2
 
