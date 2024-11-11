@@ -67,9 +67,11 @@
     },
     "Rebar": {
         "T": {
+            "Name": "High Strength Deformed Bars",
             "f_yk": 460
         },
         "R": {
+            "Name": "Mild Steel Deformed Bars",
             "f_yk": 250
         }
     }

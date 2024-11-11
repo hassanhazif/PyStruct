@@ -4,6 +4,7 @@ from math import pi
 from math import tan
 from math import cos
 from math import sin
+from math import radians
 from Prelims import cot
 
 BarArray = {"TOP":["T",0,[[4,16]]], 
@@ -19,7 +20,7 @@ def main():
     # print(BarArrayDet("BTM",BarArray))
 
 class RCC_BeamRect:
-    def __init__(self, name:str, M_ED:float, V_ED:float, T_ED:float, breadth:float, height:float, BarArray, Concrete_Material:str, Moment_redist:float = 10, ConcreteCover = 0):
+    def __init__(self, name:str, M_ED:float, V_ED:float, T_ED:float, breadth:float, height:float, BarArray, Concrete_Material:str, Moment_redist:float = 10, ConcreteCover = 25):
         """ Define a Rectangular Reinforced Concrete Beam
         :param name:
         :param M_ED: Design moment in kNm
@@ -38,19 +39,31 @@ class RCC_BeamRect:
         self.name = name
         self.concreteMaterial = Concrete_Material
         self.concreteData = LoadData('data/Materials.json')["Concrete"][Concrete_Material]
+        self.Ac = breadth * height
+        self.bars = BarArray
+        self.rftopData = LoadData('data/Materials.json')["Rebar"][self.bars["TOP"][0]]
+        self.rfbtmData = LoadData('data/Materials.json')["Rebar"][self.bars["BTM"][0]]
+        self.rflnkData = LoadData('data/Materials.json')["Rebar"][self.bars["LNK"][0]]
         self.b = breadth
         self.h = height
-        self.bars = BarArray
         self.f_ck = self.concreteData["f_ck"]
+        self.f_yk_TOP = self.rftopData["f_yk"]
+        self.f_yk_BTM = self.rfbtmData["f_yk"]
+        self.f_yk_LNK = self.rflnkData["f_yk"]
         self.linkDia = self.bars["LNK"][2][0][1]
+        self.linkSpacing = self.bars["LNK"][1]
+        self.As_w = BarArrayDet("LNK",self.bars)["As_Prov"]
         self.d = EffectiveDepth(self.h,ConcreteCover,self.linkDia,SteelCentroid("BTM",BarArray))
         self.d2 = self.h - EffectiveDepth(self.h,ConcreteCover,self.linkDia,SteelCentroid("TOP",BarArray))
         self.z = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["z"]
         self.rf_type = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["rf"]
         self.K = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["K"]
         self.K_prime = LeverArmZ(M_ED,breadth,self.d,self.f_ck,redistribution=Moment_redist)["K_prime"]
-        self.As_Req = AsReq(M_ED,self.b,self.d,self.d2,self.z,460,self.f_ck,self.K,self.K_prime)
-
+        self.As_Req = AsReq(M_ED,self.b,self.d,self.d2,self.z,self.f_yk_TOP,self.f_ck,self.K,self.K_prime)
+        self.V_ED = V_ED
+        self.ConcShearCapacity = ConcShearCapacity(self.b,self.d,self.As_Prov("TOP"),self.Ac,self.f_ck)
+        self.RfShearCapacity = RfShearCapacity(self.As_w,self.linkSpacing,self.f_yk_LNK,self.b,self.z,self.f_ck)
+    
     def As_Prov(self, location):
         As_Prov = BarArrayDet(location.upper(),self.bars)["As_Prov"]
         return(As_Prov)
@@ -66,6 +79,20 @@ class RCC_BeamRect:
         else:
             Out["A_sc"] = "FAIL"
         return Out
+    
+    def ShearCheck(self):
+        Out = {}
+        a = self.ConcShearCapacity
+        b = self.V_ED
+        if a >= self.V_ED:
+            Out["Check 1"] = f"V_Rdc ({a}) >= V_ED ({b}), SHEAR RF IS NOT REQUIRED"
+        else:
+            Out[1] = f"V_Rdc ({a}) <= V_ED ({b}), SHEAR RF IS REQUIRED"
+            if self.RfShearCapacity >= self.V_ED:
+                Out["V_RD"] = "PASS"
+            else:
+                Out["V_RD"] = "FAIL"
+        return(Out)
 
 def BarArrayDet(Location:str,BarArray):
     ''' Enter Bar array to give details
@@ -177,7 +204,7 @@ def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:f
     }) 
 
 def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:float,f_yk:float, f_ck:float, K:float, K_prime:float, gamma_st:float = 1.15):
-    """ Area of tension reinforcment required
+    """ Area of reinforcment required
     :param Moment: KNm
     :param LeverArmZ: mm
     :param f_yd: Design yield strength of reinforcement (MPa)
@@ -198,7 +225,7 @@ def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:floa
     return ({"A_st": ceil(A_st),"A_sc": ceil(A_sc)})
 
 def ConcShearCapacity(b_w, d, A_sl, A_c, f_ck, gamma_c = 1.5, N_Ed = 0):
-    ''' Concrete shear capacity formula for members not requiring s (empirical) (Equation 6.2a EN 1992-1-1)
+    ''' Concrete shear capacity formula for members not requiring shear reinforcement (empirical) (Equation 6.2a EN 1992-1-1)
     :param b_w: smallest width of the cross-section in the tensile area
     :param d: effective depth
     :param A_sl: fully anchored tension reinforcement
@@ -222,22 +249,24 @@ def ConcShearCapacity(b_w, d, A_sl, A_c, f_ck, gamma_c = 1.5, N_Ed = 0):
     
     return V_Rd_c
                      
-def ShearCapacity(A_sw, S, f_ywk, b_w,z,v_1,f_ck,alpha_cw = 1,theta = 21.8, alpha = 90, gamma_c = 1.5, gamma_y = 1.15):
-    ''' Shear Capacity of a section
-    :param A_sw: cross sectional area of shear reinforcement
+def RfShearCapacity(As_w, S, f_ywk, b_w,z,f_ck,alpha_cw = 1,theta = 21.8, alpha = 90, gamma_c = 1.5, gamma_y = 1.15):
+    ''' Shear Capacity of a section requiring shear reinforcement
+    :param As_w: cross sectional area of shear reinforcement
     :param S: Spacing of reinforcement
     :param f_ywk: Characteristic yield of shear reinforcement
     :param b_w: smallest width of the cross section in the tensile area
     :param z: lever arm of the section
-    :param v_1: empirical factor to take account of the actual stress distribution in the concrete.
+    :param v_1: empirical factor to take account of the actual stress distribution in the concrete
     :param f_cd: design concrete strength
     :param alpha_cw: a coefficient taking account of any applied compression force (for non-prestressed structures alpha_cw = 1)
-    :param theta: between 21.8 and 45 degrees
-    :param alpha: angle between shear reinforcement and the beam axis
+    :param theta: between 21.8 and 45 degrees (enter in degrees)
+    :param alpha: angle between shear reinforcement and the beam axis, vertical bars are 90 degrees (enter in degrees)
     '''
     # V_RD > V_ED
+    theta = radians(theta)
+    alpha = radians(alpha)
     f_ywd = f_ywk / gamma_y
-    V_Rd_s = (A_sw/S)*z*f_ywd*(cot(theta)+cot(alpha))*sin(alpha)
+    V_Rd_s = (As_w/S)*z*f_ywd*(cot(theta)+cot(alpha))*sin(alpha)
 
     f_cd = f_ck / gamma_c
     v = 0.6*(1 - (f_ck/250))
