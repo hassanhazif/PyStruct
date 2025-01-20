@@ -1,0 +1,1 @@
+Beam Flexural check not working. Suspect it is a unit issue. Should have used forallpeople

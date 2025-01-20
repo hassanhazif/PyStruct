@@ -82,12 +82,12 @@ class RCC_BeamRect:
     
     def ShearCheck(self):
         Out = {}
-        a = self.ConcShearCapacity
+        V_Rdc = self.ConcShearCapacity
         b = self.V_ED
-        if a >= self.V_ED:
-            Out["Check 1"] = f"V_Rdc ({a}) >= V_ED ({b}), SHEAR RF IS NOT REQUIRED"
+        if V_Rdc >= self.V_ED:
+            Out["Check 1"] = f"V_Rdc ({V_Rdc}) >= V_ED ({b}), SHEAR RF IS NOT REQUIRED"
         else:
-            Out[1] = f"V_Rdc ({a}) <= V_ED ({b}), SHEAR RF IS REQUIRED"
+            Out[1] = f"V_Rdc ({V_Rdc}) <= V_ED ({b}), SHEAR RF IS REQUIRED"
             if self.RfShearCapacity >= self.V_ED:
                 Out["V_RD"] = "PASS"
             else:
@@ -204,11 +204,14 @@ def LeverArmZ(moment:float,breadth:float,depth:float,f_ck:float,redistribution:f
     }) 
 
 def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:float,f_yk:float, f_ck:float, K:float, K_prime:float, gamma_st:float = 1.15):
+    ## might be erroneous
     """ Area of reinforcment required
     :param Moment: KNm
+    :param breadth:
+    :param depth:
+    :param depth2: depth to top reinforcement centroid from top face
     :param LeverArmZ: mm
     :param f_yd: Design yield strength of reinforcement (MPa)
-    :param x: d - neutral axis
     """
     M = Moment * 1e6
     z = LeverArmZ
@@ -225,7 +228,8 @@ def AsReq(Moment:float, breadth:float, depth:float, depth2:float, LeverArmZ:floa
     return ({"A_st": ceil(A_st),"A_sc": ceil(A_sc)})
 
 def ConcShearCapacity(b_w, d, A_sl, A_c, f_ck, gamma_c = 1.5, N_Ed = 0):
-    ''' Concrete shear capacity formula for members not requiring shear reinforcement (empirical) (Equation 6.2a EN 1992-1-1)
+    # Might need to verify units. might be outputting in N instead of kN
+    ''' kN, Concrete shear capacity formula for members not requiring shear reinforcement (empirical) (Equation 6.2a EN 1992-1-1)
     :param b_w: smallest width of the cross-section in the tensile area
     :param d: effective depth
     :param A_sl: fully anchored tension reinforcement
@@ -247,10 +251,10 @@ def ConcShearCapacity(b_w, d, A_sl, A_c, f_ck, gamma_c = 1.5, N_Ed = 0):
     else:
         V_Rd_c = max((0.12*k*(100*rho_1*f_ck)**(1/3)*b_w*d, (0.035*k**(3/2)*f_ck**(1/2))*b_w*d))
     
-    return V_Rd_c
+    return (V_Rd_c/1000) #Convert to kN
                      
 def RfShearCapacity(As_w, S, f_ywk, b_w,z,f_ck,alpha_cw = 1,theta = 21.8, alpha = 90, gamma_c = 1.5, gamma_y = 1.15):
-    ''' Shear Capacity of a section requiring shear reinforcement
+    '''kN Shear Capacity of a section requiring shear reinforcement
     :param As_w: cross sectional area of shear reinforcement
     :param S: Spacing of reinforcement
     :param f_ywk: Characteristic yield of shear reinforcement
@@ -274,7 +278,7 @@ def RfShearCapacity(As_w, S, f_ywk, b_w,z,f_ck,alpha_cw = 1,theta = 21.8, alpha 
     V_Rd_max = (alpha_cw*b_w*z*v_1*f_cd)*(cot(theta)+cot(alpha))/(1+cot(theta)**2)
 
     V_Rd = min(V_Rd_s, V_Rd_max)
-    return V_Rd
+    return (V_Rd/1000) # convert to kN
 
 # def BarNotation(BarArray):
 #     T = []
