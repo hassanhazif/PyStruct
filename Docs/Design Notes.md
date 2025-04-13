@@ -73,3 +73,11 @@ $\theta$ may be assumed to be any angle between 21.8 and 45.
 > EC2-1 - Clause 7.3.2
 
 This is where the mid-height reinforcement in beams come from. There is a spacing limitation
+
+# Detailing of Members
+
+## Links
+
+> EC2-1 - Clause 9.3.2
+
+This is where column links detailing information is
