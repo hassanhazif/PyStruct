@@ -5,7 +5,7 @@ Structural Design Library
 # Prerequisites
 
 - numpy
-- forallpeople
+- forallpeople (in development)
 
 # Functionality
 
