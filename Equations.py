@@ -6,6 +6,7 @@ from math import cos
 from math import sin
 from math import radians
 from Prelims import cot
+import forallpeople as si
 
 def BarArrayDet(Location:str,BarArray):
     ''' Enter Bar array to give details
@@ -14,7 +15,7 @@ def BarArrayDet(Location:str,BarArray):
     output: S - Spacing, fyk - Bar strength, AsProv - Provided area of Reinforcement, Layers - Number of Layers
     '''
     Material_Data = LoadData('data/Materials.json')["Rebar"][BarArray[Location][0]]
-    f_yk = Material_Data["f_yk"]
+    f_yk = Material_Data["f_yk"]["value"]
     S = BarArray[Location][1] #spacing
     layers = BarArray[Location][2]
     Area = 0

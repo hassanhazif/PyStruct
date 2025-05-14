@@ -39,10 +39,10 @@ class RCC_BeamRect:
         self.rflnkData = LoadData('data/Materials.json')["Rebar"][self.bars["LNK"][0]]
         self.b = breadth #Breadth
         self.h = height #Height 
-        self.f_ck = self.concreteData["f_ck"]
-        self.f_yk_TOP = self.rftopData["f_yk"]
-        self.f_yk_BTM = self.rfbtmData["f_yk"]
-        self.f_yk_LNK = self.rflnkData["f_yk"]
+        self.f_ck = self.concreteData["f_ck"]["value"]
+        self.f_yk_TOP = self.rftopData["f_yk"]["value"]
+        self.f_yk_BTM = self.rfbtmData["f_yk"]["value"]
+        self.f_yk_LNK = self.rflnkData["f_yk"]["value"]
         self.linkDia = self.bars["LNK"][2][0][1]
         self.linkSpacing = self.bars["LNK"][1]
         self.As_w = BarArrayDet("LNK",self.bars)["As_Prov"]

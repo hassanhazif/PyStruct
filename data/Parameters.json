@@ -1,0 +1,72 @@
+{
+    "f_ck_cube": {
+        "name": "Characteristic cube strength of concrete",
+        "base_units": "Pressure",
+        "latex": "f_{ck_cube}"
+    },
+    "f_ck": {
+        "name": "Characteristic cylinder strength of concrete",
+        "base_units": "Pressure",
+        "latex": ""
+    },
+    "f_cm": {
+        "name": "", 
+        "base_units": "",
+        "latex": ""
+    },
+    "f_ctm": {
+        "name": "",
+        "base_units": "MPa",
+        "latex": ""
+    },
+    "E_cm": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "epsilon_c1": {
+        "name": "", 
+        "base_units": "",
+        "latex": ""
+    },
+    "epsilon_cu1": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "epsilon_c2": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "epsilon_cu2": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "n": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "epsilon_c3": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "epsilon_cu3": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "rho_min": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    },
+    "rho_w_min": {
+        "name": "",
+        "base_units": "",
+        "latex": ""
+    }
+}
